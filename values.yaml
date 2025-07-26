@@ -1,0 +1,144 @@
+controller:
+  affinity: {}
+  defaultOnDeletePolicy: delete
+  dnsPolicy: ClusterFirstWithHostNet
+  livenessProbe:
+    healthPort: 29652
+  logLevel: 5
+  name: csi-nfs-controller
+  nodeSelector: {}
+  priorityClassName: system-cluster-critical
+  replicas: 1
+  resources:
+    csiProvisioner:
+      limits:
+        memory: 400Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    csiSnapshotter:
+      limits:
+        memory: 200Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    livenessProbe:
+      limits:
+        memory: 100Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    nfs:
+      limits:
+        memory: 200Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+  runOnControlPlane: false
+  runOnMaster: false
+  strategyType: Recreate
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+      operator: Exists
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/controlplane
+      operator: Exists
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Exists
+  workingMountDir: /tmp
+customLabels: {}
+driver:
+  mountPermissions: 0
+  name: nfs.csi.k8s.io
+externalSnapshotter:
+  controller:
+    replicas: 1
+  customResourceDefinitions:
+    enabled: true
+  enabled: false
+  name: snapshot-controller
+  priorityClassName: system-cluster-critical
+  resources:
+    limits:
+      memory: 300Mi
+    requests:
+      cpu: 10m
+      memory: 20Mi
+feature:
+  enableFSGroupPolicy: true
+  enableInlineVolume: false
+  propagateHostMountOptions: false
+image:
+  baseRepo: registry.k8s.io
+  csiProvisioner:
+    pullPolicy: IfNotPresent
+    repository: registry.k8s.io/sig-storage/csi-provisioner
+    tag: v5.0.2
+  csiSnapshotter:
+    pullPolicy: IfNotPresent
+    repository: registry.k8s.io/sig-storage/csi-snapshotter
+    tag: v8.0.1
+  externalSnapshotter:
+    pullPolicy: IfNotPresent
+    repository: registry.k8s.io/sig-storage/snapshot-controller
+    tag: v8.0.1
+  livenessProbe:
+    pullPolicy: IfNotPresent
+    repository: registry.k8s.io/sig-storage/livenessprobe
+    tag: v2.13.1
+  nfs:
+    pullPolicy: IfNotPresent
+    repository: registry.k8s.io/sig-storage/nfsplugin
+    tag: v4.9.0
+  nodeDriverRegistrar:
+    pullPolicy: IfNotPresent
+    repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
+    tag: v2.11.1
+imagePullSecrets: []
+kubeletDir: /var/lib/kubelet
+node:
+  affinity: {}
+  dnsPolicy: ClusterFirstWithHostNet
+  livenessProbe:
+    healthPort: 29653
+  logLevel: 5
+  maxUnavailable: 1
+  name: csi-nfs-node
+  nodeSelector: {}
+  priorityClassName: system-cluster-critical
+  resources:
+    livenessProbe:
+      limits:
+        memory: 100Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    nfs:
+      limits:
+        memory: 300Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    nodeDriverRegistrar:
+      limits:
+        memory: 100Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+  tolerations:
+    - operator: Exists
+rbac:
+  create: true
+  name: nfs
+serviceAccount:
+  controller: csi-nfs-controller-sa
+  create: true
+  node: csi-nfs-node-sa
+storageClass:
+  create: false
+global:
+  cattle:
+    systemProjectId: p-jrfqn
+
